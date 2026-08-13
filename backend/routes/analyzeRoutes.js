@@ -38,14 +38,15 @@ router.post('/', async (req, res) => {
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
       }
     });
 
-    const aiResult = JSON.parse(response.text);
+    const rawText = response.text.replace(/```json\n?|```/g, '').trim();
+    const aiResult = JSON.parse(rawText);
 
     const severity = aiResult.severity || (errorMessage ? 'High' : 'Medium');
 
