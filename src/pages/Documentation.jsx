@@ -56,7 +56,7 @@ function CodeBlock({ code, language = "javascript" }) {
         </div>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-2 rounded-md px-2 py-1 text-xs text-gray-400 transition hover:bg-white/5 hover:text-white"
+          className="flex items-center gap-2 rounded-md px-2 py-1 text-xs text-gray-400 transition hover:bg-white/5 hover:text-white cursor-pointer"
         >
           {copied ? (
             <>
@@ -187,7 +187,7 @@ export default function Documentation() {
                         className={`
                           flex w-full items-center justify-between
                           rounded-lg px-3 py-2 text-left text-sm
-                          transition
+                          transition cursor-pointer
                           ${
                             activeSection === item.id
                               ? "bg-purple-600/10 text-purple-600"

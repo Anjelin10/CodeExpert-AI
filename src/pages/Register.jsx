@@ -12,7 +12,7 @@ export default function Register() {
   });
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -26,9 +26,26 @@ export default function Register() {
       return;
     }
 
-    // Add real registration logic here
-    console.log('Registration attempt:', formData);
-    navigate('/login');
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        navigate('/login');
+      } else {
+        setError(data.error || 'Registration failed');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('An error occurred during registration');
+    }
   };
 
   return (
@@ -139,7 +156,7 @@ export default function Register() {
             <div className="pt-2">
               <button
                 type="submit"
-                className="flex w-full justify-center rounded-md bg-purple-600 py-2.5 px-4 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-[#18181B] transition-colors"
+                className="flex w-full justify-center rounded-md bg-purple-600 py-2.5 px-4 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-[#18181B] transition-colors cursor-pointer"
               >
                 Register
               </button>

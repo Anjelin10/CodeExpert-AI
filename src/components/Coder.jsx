@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { LuFileCode } from "react-icons/lu";
 import Editor from '@monaco-editor/react';
 import { IoSearchSharp } from 'react-icons/io5';
 
-export default function Coder({ onAnalyze, onClearAnalyzer }) {
+export default function Coder({ onAnalyze, onClearAnalyzer, initialData }) {
     const [level, setLevel] = useState('Intermediate');
     const [code, setCode] = useState('');
     const [language, setLanguage] = useState('javascript');
@@ -13,6 +13,18 @@ export default function Coder({ onAnalyze, onClearAnalyzer }) {
         suggestFix: false,
         correctedCode: false,
     });
+
+    useEffect(() => {
+        if (initialData) {
+            setCode(initialData.code || '');
+            setLanguage(initialData.language || 'javascript');
+            setErrorMessage(initialData.errorMessage || '');
+            setLevel(initialData.level || 'Intermediate');
+            if (initialData.features) {
+                setFeatures(initialData.features);
+            }
+        }
+    }, [initialData]);
     
     const languagesList = [
         { value: 'javascript', label: 'JavaScript' },
@@ -159,7 +171,7 @@ export default function Coder({ onAnalyze, onClearAnalyzer }) {
             </div>
         
             <div className="mt-4 flex gap-2">
-                <button type="button" onClick={onAnalyze} className="flex h-8 flex-1 cursor-pointer items-center justify-center gap-2 rounded-md bg-[#8B5CF6] text-xs font-medium text-white transition hover:bg-[#7C3AED] active:scale-[0.99]">
+                <button type="button" onClick={() => onAnalyze({ code, language, errorMessage, features, level })} className="flex h-8 flex-1 cursor-pointer items-center justify-center gap-2 rounded-md bg-[#8B5CF6] text-xs font-medium text-white transition hover:bg-[#7C3AED] active:scale-[0.99]">
                     <span className="text-[11px]"><IoSearchSharp /></span>
                     Analyze Bug
                 </button>

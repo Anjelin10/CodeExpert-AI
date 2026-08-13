@@ -5,15 +5,32 @@ import logoMark from '../assets/logo-mark.png';
 export default function Login() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add real login logic here
-    console.log('Login attempt:', formData);
-    navigate('/');
+    setError('');
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      const data = await response.json();
+      
+      if (response.ok) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        navigate('/');
+      } else {
+        setError(data.error || 'Login failed');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('An error occurred during login');
+    }
   };
 
   return (
@@ -46,18 +63,23 @@ export default function Login() {
       <div className="relative z-10 mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-[#18181B]/80 backdrop-blur-xl border border-[#27272A] py-8 px-4 shadow-2xl sm:rounded-xl sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/50 text-red-500 text-sm p-3 rounded-md">
+                {error}
+              </div>
+            )}
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-[#D4D4D8]">
-                Username
+                Email address
               </label>
               <div className="mt-2">
                 <input
-                  id="username"
-                  name="username"
-                  type="text"
+                  id="email"
+                  name="email"
+                  type="email"
                   required
-                  value={formData.username}
-                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="block w-full rounded-md border border-[#27272A] bg-[#09090B] py-2 px-3 text-[#F4F4F5] shadow-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 sm:text-sm transition-colors"
                 />
               </div>
@@ -83,7 +105,7 @@ export default function Login() {
             <div>
               <button
                 type="submit"
-                className="flex w-full justify-center rounded-md bg-purple-600 py-2.5 px-4 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-[#18181B] transition-colors"
+                className="flex w-full justify-center rounded-md bg-purple-600 py-2.5 px-4 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-[#18181B] transition-colors cursor-pointer"
               >
                 Sign in
               </button>

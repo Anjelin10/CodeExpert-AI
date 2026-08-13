@@ -7,11 +7,11 @@ import Documentation from './pages/Documentation'
 import Login from './pages/Login'
 import Profile from './pages/Profile'
 import Register from './pages/Register'
-
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
+    <>
+      <Routes>
+        <Route path="/" element={<Home />} />
       <Route path="/history" element={<History/>} />
       <Route path="/saved" element={<Saved/>} />
       <Route path="/documentation" element={<Documentation/>} />
@@ -19,5 +19,6 @@ export default function App() {
       <Route path='/register' element={<Register/>} />
       <Route path='/profile' element={<Profile/>} />
     </Routes>
+    </>
   )
 }

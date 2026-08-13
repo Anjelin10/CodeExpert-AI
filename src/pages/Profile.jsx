@@ -1,13 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { FiUser, FiMail, FiEdit2, FiShield, FiBell } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 export default function Profile() {
+  const navigate = useNavigate();
   const [user, setUser] = useState({
-    username: 'CodeNinja99',
-    email: 'ninja@example.com',
-    memberSince: 'Aug 2026'
+    username: '',
+    email: '',
+    memberSince: '',
+    bio: ''
   });
+  const [isEditing, setIsEditing] = useState(false);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    const localUser = JSON.parse(localStorage.getItem('user'));
+    if (!localUser) {
+      navigate('/login');
+      return;
+    }
+    fetch(`http://localhost:5000/api/auth/${localUser.id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) throw new Error(data.error);
+        const date = new Date(data.created_at);
+        setUser({
+          id: data.id,
+          username: data.username,
+          email: data.email,
+          bio: data.bio || '',
+          memberSince: date.toLocaleString('default', { month: 'short', year: 'numeric' })
+        });
+      })
+      .catch(err => console.error(err));
+  }, [navigate]);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`http://localhost:5000/api/auth/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: user.username, bio: user.bio })
+      });
+      if (res.ok) {
+        setIsEditing(false);
+        setMessage('Profile updated successfully!');
+        setTimeout(() => setMessage(''), 3000);
+        const localUser = JSON.parse(localStorage.getItem('user'));
+        localStorage.setItem('user', JSON.stringify({ ...localUser, username: user.username, bio: user.bio }));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#09090B] text-[#F4F4F5]">
@@ -32,23 +79,6 @@ export default function Profile() {
                 <p className="text-xs text-[#A1A1AA]">Member since {user.memberSince}</p>
               </div>
             </div>
-
-            <div className="bg-[#18181B] border border-[#27272A] rounded-xl overflow-hidden">
-              <nav className="flex flex-col">
-                <button className="flex items-center gap-3 px-4 py-3 text-sm font-medium bg-[#27272A] text-purple-400 border-l-2 border-purple-500 text-left">
-                  <FiUser size={16} />
-                  Account Details
-                </button>
-                <button className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#A1A1AA] hover:bg-[#27272A]/50 transition-colors text-left border-l-2 border-transparent hover:border-[#52525B]">
-                  <FiShield size={16} />
-                  Security
-                </button>
-                <button className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#A1A1AA] hover:bg-[#27272A]/50 transition-colors text-left border-l-2 border-transparent hover:border-[#52525B]">
-                  <FiBell size={16} />
-                  Notifications
-                </button>
-              </nav>
-            </div>
           </div>
 
           {/* Right Column - Form */}
@@ -56,13 +86,22 @@ export default function Profile() {
             <div className="bg-[#18181B] border border-[#27272A] rounded-xl p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-medium text-[#F4F4F5]">Account Details</h3>
-                <button className="flex items-center gap-2 text-sm text-purple-500 hover:text-purple-400 transition-colors">
+                <button 
+                  onClick={() => setIsEditing(!isEditing)}
+                  className="flex items-center gap-2 text-sm text-purple-500 hover:text-purple-400 transition-colors cursor-pointer"
+                >
                   <FiEdit2 size={14} />
-                  Edit
+                  {isEditing ? 'Cancel' : 'Edit'}
                 </button>
               </div>
 
-              <form className="space-y-6">
+              {message && (
+                <div className="mb-4 text-sm text-green-400 bg-green-400/10 p-2 rounded border border-green-400/20">
+                  {message}
+                </div>
+              )}
+
+              <form className="space-y-6" onSubmit={handleSave}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-[#D4D4D8] mb-2">
@@ -74,9 +113,10 @@ export default function Profile() {
                       </div>
                       <input
                         type="text"
-                        disabled
+                        disabled={!isEditing}
                         value={user.username}
-                        className="block w-full rounded-md border border-[#27272A] bg-[#09090B] py-2.5 pl-10 pr-3 text-[#A1A1AA] sm:text-sm cursor-not-allowed"
+                        onChange={(e) => setUser({...user, username: e.target.value})}
+                        className={`block w-full rounded-md border border-[#27272A] bg-[#09090B] py-2.5 pl-10 pr-3 text-[#A1A1AA] sm:text-sm ${!isEditing ? 'cursor-not-allowed' : 'focus:border-purple-500 outline-none'}`}
                       />
                     </div>
                   </div>
@@ -105,18 +145,23 @@ export default function Profile() {
                   </label>
                   <textarea
                     rows={4}
+                    disabled={!isEditing}
+                    value={user.bio}
+                    onChange={(e) => setUser({...user, bio: e.target.value})}
                     placeholder="Tell us a little bit about yourself"
-                    className="block w-full rounded-md border border-[#27272A] bg-[#09090B] py-2 px-3 text-[#F4F4F5] placeholder:text-[#52525B] focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 sm:text-sm transition-colors"
+                    className={`block w-full rounded-md border border-[#27272A] bg-[#09090B] py-2 px-3 text-[#F4F4F5] placeholder:text-[#52525B] sm:text-sm transition-colors ${!isEditing ? 'cursor-not-allowed opacity-70' : 'focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500'}`}
                   ></textarea>
                 </div>
 
                 <div className="pt-4 border-t border-[#27272A] flex justify-end">
-                  <button
-                    type="button"
-                    className="rounded-md bg-purple-600 py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-[#18181B] transition-colors"
-                  >
-                    Save Changes
-                  </button>
+                  {isEditing && (
+                    <button
+                      type="submit"
+                      className="rounded-md bg-purple-600 py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-[#18181B] transition-colors cursor-pointer"
+                    >
+                      Save Changes
+                    </button>
+                  )}
                 </div>
               </form>
             </div>
