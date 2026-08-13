@@ -53,7 +53,7 @@ export default function Home() {
     setAnalysisState('loading');
     
     try {
-      const res = await fetch('http://localhost:5000/api/analyze', {
+      const res = await fetch('https://codeexpert-ai.onrender.com/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -86,7 +86,7 @@ export default function Home() {
   const handleSave = async () => {
     if (!currentAnalysis || !currentAnalysis.id) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/history/${currentAnalysis.id}/toggle-save`, {
+      const res = await fetch(`https://codeexpert-ai.onrender.com/api/history/${currentAnalysis.id}/toggle-save`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_saved: true })

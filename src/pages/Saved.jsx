@@ -17,7 +17,7 @@ export default function Saved() {
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/history/user/${user.id}/saved`);
+      const res = await fetch(`https://codeexpert-ai.onrender.com/api/history/user/${user.id}/saved`);
       const data = await res.json();
       setHistoryData(data);
     } catch (err) {
@@ -36,7 +36,7 @@ export default function Saved() {
   const confirmUnsave = async () => {
     if (!itemToDelete) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/history/${itemToDelete}/toggle-save`, {
+      const res = await fetch(`https://codeexpert-ai.onrender.com/api/history/${itemToDelete}/toggle-save`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_saved: false })
@@ -52,7 +52,7 @@ export default function Saved() {
 
   const handleToggleSave = async (id, currentStatus) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/history/${id}/toggle-save`, {
+      const res = await fetch(`https://codeexpert-ai.onrender.com/api/history/${id}/toggle-save`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_saved: !currentStatus })

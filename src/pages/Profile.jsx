@@ -20,7 +20,7 @@ export default function Profile() {
       navigate('/login');
       return;
     }
-    fetch(`http://localhost:5000/api/auth/${localUser.id}`)
+    fetch(`https://codeexpert-ai.onrender.com/api/auth/${localUser.id}`)
       .then(res => res.json())
       .then(data => {
         if (data.error) throw new Error(data.error);
@@ -39,7 +39,7 @@ export default function Profile() {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:5000/api/auth/${user.id}`, {
+      const res = await fetch(`https://codeexpert-ai.onrender.com/api/auth/${user.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: user.username, bio: user.bio })
